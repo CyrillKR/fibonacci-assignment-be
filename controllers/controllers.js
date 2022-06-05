@@ -5,6 +5,7 @@ const { writeToLocalFile, readFromLocalFile } = require("../utils/fsUtils");
 async function getFibonacci(req, res) {
   const { n } = req.params;
   const nInt = parseInt(n);
+  const LIMIT = 1476;
   if (isNaN(nInt) || nInt < 0) {
     res.status(400).json({ msg: "You must pass a positive integer!" });
     return;
@@ -12,6 +13,11 @@ async function getFibonacci(req, res) {
 
   if (nInt === 42) {
     res.status(400).json({ msg: "42 is the meaning of life!" });
+    return;
+  }
+
+  if (nInt > LIMIT) {
+    res.status(400).json({ msg: "Requested number exceeded limit" });
     return;
   }
 
@@ -29,6 +35,10 @@ async function getHistory(req, res) {
   const limitInt = parseInt(limit);
 
   const results = readFromLocalFile(limitInt);
+  if (!results) {
+    res.status(404).json({ msg: "No results were found" });
+    return;
+  }
   res.status(200).json(results);
 }
 

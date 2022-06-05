@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 async function writeToLocalFile(result) {
-  const filePath = path.resolve(path.dirname("temp"), "temp", "reults.txt");
+  const filePath = path.resolve(path.dirname("temp"), "temp", "results.txt");
   try {
     await fs.writeFile(
       filePath,
@@ -18,35 +18,50 @@ async function writeToLocalFile(result) {
 }
 
 function readFromLocalFile(limit) {
-  const filePath = path.resolve(path.dirname("temp"), "temp", "reults.txt");
-  const file = fs.readFileSync(filePath, "utf8");
-  const resultArray = file.split("\n");
+  let resultsArray = [];
+  const filePath = path.resolve(path.dirname("temp"), "temp", "results.txt");
 
-  if (!resultArray[resultArray.length - 1]) {
-    resultArray.pop();
-  }
-  const json = {
-    results: [],
-  };
-
-  if (!limit || isNaN(limit)) {
-    for (let i = 1; i <= 5; i++) {
-      if (!resultArray[resultArray.length - i]) {
-        break;
-      }
-      json.results.push(resultArray[resultArray.length - i]);
+  try {
+    if (fs.existsSync(filePath)) {
+      const file = fs.readFileSync(filePath, "utf8");
+      resultsArray = file.split("\n");
+      if (!resultsArray || resultsArray[0] === "") return;
+    } else {
+      return;
     }
-  } else {
-    for (let i = 1; i <= limit; i++) {
-      if (!resultArray[resultArray.length - i]) {
-        break;
-      }
-      json.results.push(resultArray[resultArray.length - i]);
+    if (!resultsArray[resultsArray.length - 1]) {
+      resultsArray.pop();
     }
-  }
+    const json = {
+      results: [],
+    };
 
-  return json;
+    if (!limit || isNaN(limit)) {
+      for (let i = 1; i <= 5; i++) {
+        if (!resultsArray[resultsArray.length - i]) {
+          break;
+        }
+        json.results.push(JSON.parse(resultsArray[resultsArray.length - i]));
+      }
+    } else {
+      for (let i = 1; i <= limit; i++) {
+        if (!resultsArray[resultsArray.length - i]) {
+          break;
+        }
+        json.results.push(JSON.parse(resultsArray[resultsArray.length - i]));
+      }
+    }
+
+    return json;
+  } catch (err) {
+    console.log(err);
+  }
 }
+
+
+
+
+
 
 readFromLocalFile();
 module.exports = { writeToLocalFile, readFromLocalFile };
